@@ -13,7 +13,8 @@ rec {
         inherit url rev ref;
       };
     in
-      /. + builtins.readFile (runCommand "find-crate-${name}-${version}"
+      # Hacky workaround on store path
+      /. + "/nix/store" + builtins.elemAt (builtins.split "/nix/store" (builtins.readFile (runCommand "find-crate-${name}-${version}"
         { nativeBuildInputs = [ jq remarshal ]; }
         ''
           shopt -s globstar
@@ -26,7 +27,7 @@ rec {
 
           echo Crate ${name}-${version} not found in ${url}
           exit 1
-        '');
+        ''))) 2;
 
   # This implementation of `fetchCrateAlternativeRegistry` assumes that the download URL is updated frequently
   # on the registry index as a workaround for the lack of authentication for crate downloads. Each time a crate needs
